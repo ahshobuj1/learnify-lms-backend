@@ -5,8 +5,12 @@ export type TUser = {
   avatar?: string;
   status: 'in-progress' | 'blocked';
   role: 'user' | 'admin';
-  needPasswordChange: boolean;
   isDeleted: boolean;
+};
+
+export type TActivateUser = {
+  activate_code: string;
+  activate_token: string;
 };
 
 export type TLogin = {

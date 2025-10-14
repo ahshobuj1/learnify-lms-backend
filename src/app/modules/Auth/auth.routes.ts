@@ -16,6 +16,12 @@ router.post(
 );
 
 router.post(
+  '/activate-user',
+  validationChecker(authValidations.activateUser),
+  authController.activateUser,
+);
+
+router.post(
   '/login',
   validationChecker(authValidations.login),
   authController.login,

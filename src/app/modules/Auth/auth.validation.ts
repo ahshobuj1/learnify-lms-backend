@@ -19,6 +19,13 @@ const create = z.object({
     .min(6, { message: "password can't be less then 6 characters" }),
 });
 
+const activateUser = z.object({
+  activate_code: z.string({ required_error: 'Opt is required!' }),
+  activate_token: z.string({
+    required_error: 'Activation token is required..!',
+  }),
+});
+
 const changeStatus = z.object({
   status: z.enum(['in-progress', 'blocked'], {
     invalid_type_error: 'Status must be in-progress | blocked ',
@@ -37,6 +44,7 @@ const changePassword = z.object({
 
 export const authValidations = {
   create,
+  activateUser,
   changeStatus,
   login,
   changePassword,

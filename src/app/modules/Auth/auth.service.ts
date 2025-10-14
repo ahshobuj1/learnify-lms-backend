@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../../config';
 import {
+  TActivateUser,
   TChangePassword,
   TLogin,
   TResetPassword,
@@ -13,8 +14,10 @@ import { AppError } from '../../errors/AppError';
 import { sendEmail } from '../../utils/sendEmail';
 import { sendVerificationEmail } from '../../utils/sendVerificationEmail';
 import { createActivationToken } from './auth.utils';
+// import { redis } from '../../utils/redis';
 
 const register = async (payload: TUser) => {
+  //* check is user exist
   const isUserExist = await UserModel.findOne({ email: payload.email });
 
   if (isUserExist) {
@@ -22,12 +25,13 @@ const register = async (payload: TUser) => {
   }
 
   const user = {
+    name: payload.name,
     email: payload.email,
     password: payload.password,
   };
 
-  const activationDetail = createActivationToken(user);
-  const activationCode = activationDetail.activationCode;
+  //* Make activation code and token
+  const { activationCode, token } = createActivationToken(user);
 
   const options = {
     to: payload.email,
@@ -35,25 +39,47 @@ const register = async (payload: TUser) => {
     activationCode: activationCode,
   };
 
+  //* send otp to email
   await sendVerificationEmail(options);
+  return { activationToken: token };
+};
 
-  // const userData: Partial<TUser> = {
-  //   name: payload.name,
-  //   email: payload.email,
-  //   password: payload.password,
-  //   role: 'user',
-  //   status: 'in-progress',
-  //   isDeleted: false,
-  //   needPasswordChange: true,
-  // };
+const activateUser = async (payload: TActivateUser) => {
+  //* verify token
+  const decoded = jwt.verify(
+    payload.activate_token,
+    config.jwt_access_secret as string,
+  ) as JwtPayload;
 
-  // const createUser = await UserModel.create(userData);
+  const { user, activationCode } = decoded;
 
-  // if (!createUser) {
-  //   throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create user..?');
-  // }
+  //* Check is activation otp match
+  if (activationCode !== payload.activate_code) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Invalid activation code..?');
+  }
 
-  return { activationToken: activationDetail.token };
+  //* check is user exist
+  const isUserExist = await UserModel.findOne({ email: user.email });
+  if (isUserExist) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User email already exist');
+  }
+
+  const userData: Partial<TUser> = {
+    name: user.name,
+    email: user.email,
+    password: user.password,
+    role: 'user',
+    status: 'in-progress',
+    isDeleted: false,
+  };
+
+  const createUser = await UserModel.create(userData);
+
+  if (!createUser) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create user..?');
+  }
+
+  return { createUser };
 };
 
 const login = async (payload: TLogin) => {
@@ -71,7 +97,7 @@ const login = async (payload: TLogin) => {
   if (!user) {
     throw new AppError(
       httpStatus.NOT_FOUND,
-      'User not found, Insert correct Id',
+      'User not found, Insert correct email..!',
     );
   }
 
@@ -95,6 +121,9 @@ const login = async (payload: TLogin) => {
     throw new AppError(httpStatus.FORBIDDEN, 'Incorrect password!');
   }
 
+  // Upload session to redis
+  // redis.set(user._id, JSON.stringify(user));
+
   // create jwt token
   const jwtPayload = {
     email: user?.email,
@@ -116,7 +145,6 @@ const login = async (payload: TLogin) => {
   return {
     accessToken,
     refreshToken,
-    needPasswordChange: user?.needPasswordChange,
   };
 };
 
@@ -320,6 +348,7 @@ const resetPassword = async (payload: TResetPassword, token: string) => {
 
 export const authServices = {
   register,
+  activateUser,
   login,
   changePassword,
   refreshToken,

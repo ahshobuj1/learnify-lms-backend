@@ -16,9 +16,19 @@ const register = catchAsync(async (req, res) => {
   });
 });
 
+const activateUser = catchAsync(async (req, res) => {
+  const payload = req.body;
+  const result = await authServices.activateUser(payload);
+
+  sendResponse(res, {
+    message: `User is activate successfully..!`,
+    result: result,
+  });
+});
+
 const login = catchAsync(async (req, res) => {
   const result = await authServices.login(req.body);
-  const { refreshToken, accessToken, needPasswordChange } = result;
+  const { refreshToken, accessToken } = result;
 
   // set refresh token to cookie
   res.cookie('refreshToken', refreshToken, {
@@ -30,7 +40,7 @@ const login = catchAsync(async (req, res) => {
 
   sendResponse(res, {
     message: 'User logged in successfully',
-    result: { accessToken, needPasswordChange },
+    result: { accessToken },
   });
 });
 
@@ -80,6 +90,7 @@ const resetPassword = catchAsync(async (req, res) => {
 
 export const authController = {
   register,
+  activateUser,
   login,
   changePassword,
   refreshToken,
