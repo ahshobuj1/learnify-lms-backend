@@ -7,6 +7,7 @@ import {
   TChangePassword,
   TLogin,
   TResetPassword,
+  TSocialLogin,
   TUser,
 } from './auth.interface';
 import { UserModel } from './auth.model';
@@ -80,6 +81,68 @@ const activateUser = async (payload: TActivateUser) => {
   }
 
   return { createUser };
+};
+
+const socialLogin = async (payload: TSocialLogin) => {
+  // 1-> check exists user
+  // 5-> create jwt token and sent to client
+
+  // check if user exists
+  const user = await UserModel.findOne({ email: payload.email });
+
+  const userData: Partial<TUser> = {
+    name: payload.name,
+    email: payload.email,
+    avatar: payload?.avatar,
+    role: 'user',
+    status: 'in-progress',
+    isDeleted: false,
+  };
+
+  // create jwt token
+  const jwtPayload = {
+    email: userData?.email,
+    role: userData?.role,
+  };
+
+  const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, {
+    expiresIn: config.jwt_access_expires_in as jwt.SignOptions['expiresIn'],
+  });
+
+  const refreshToken = jwt.sign(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    {
+      expiresIn: config.jwt_refresh_expires_in as jwt.SignOptions['expiresIn'],
+    },
+  );
+
+  // If new user, then create and send token
+  if (!user) {
+    const createUser = await UserModel.create(userData);
+
+    return {
+      accessToken,
+      refreshToken,
+      user: createUser,
+    };
+  }
+
+  //check if the user isDeleted
+  if (user?.isDeleted) {
+    throw new AppError(httpStatus.FORBIDDEN, 'User is deleted');
+  }
+
+  // check if the user status is blocked
+  if (user?.status === 'blocked') {
+    throw new AppError(httpStatus.FORBIDDEN, 'User is blocked');
+  }
+
+  return {
+    accessToken,
+    refreshToken,
+    user,
+  };
 };
 
 const login = async (payload: TLogin) => {
@@ -349,6 +412,7 @@ const resetPassword = async (payload: TResetPassword, token: string) => {
 export const authServices = {
   register,
   activateUser,
+  socialLogin,
   login,
   changePassword,
   refreshToken,

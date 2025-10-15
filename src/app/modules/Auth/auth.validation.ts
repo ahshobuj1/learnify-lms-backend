@@ -26,15 +26,21 @@ const activateUser = z.object({
   }),
 });
 
-const changeStatus = z.object({
-  status: z.enum(['in-progress', 'blocked'], {
-    invalid_type_error: 'Status must be in-progress | blocked ',
-  }),
+const socialLogin = z.object({
+  name: z.string(),
+  email: z.string({ required_error: 'Id is required!' }),
+  avatar: z.string().optional(),
 });
 
 const login = z.object({
   email: z.string({ required_error: 'Id is required!' }),
   password: z.string({ required_error: 'Password is required!' }),
+});
+
+const changeStatus = z.object({
+  status: z.enum(['in-progress', 'blocked'], {
+    invalid_type_error: 'Status must be in-progress | blocked ',
+  }),
 });
 
 const changePassword = z.object({
@@ -45,7 +51,8 @@ const changePassword = z.object({
 export const authValidations = {
   create,
   activateUser,
-  changeStatus,
+  socialLogin,
   login,
+  changeStatus,
   changePassword,
 };

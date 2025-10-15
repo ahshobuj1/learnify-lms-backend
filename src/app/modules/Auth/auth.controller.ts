@@ -26,6 +26,24 @@ const activateUser = catchAsync(async (req, res) => {
   });
 });
 
+const socialLogin = catchAsync(async (req, res) => {
+  const result = await authServices.socialLogin(req.body);
+  const { refreshToken, accessToken } = result;
+
+  // set refresh token to cookie
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: true, // config.NODE_ENV === 'production',
+    sameSite: 'none',
+    maxAge: 1000 * 60 * 60 * 24 * 365,
+  });
+
+  sendResponse(res, {
+    message: 'User logged in successfully',
+    result: { accessToken },
+  });
+});
+
 const login = catchAsync(async (req, res) => {
   const result = await authServices.login(req.body);
   const { refreshToken, accessToken } = result;
@@ -91,6 +109,7 @@ const resetPassword = catchAsync(async (req, res) => {
 export const authController = {
   register,
   activateUser,
+  socialLogin,
   login,
   changePassword,
   refreshToken,

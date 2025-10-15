@@ -22,6 +22,12 @@ router.post(
 );
 
 router.post(
+  '/social-login',
+  validationChecker(authValidations.login),
+  authController.socialLogin,
+);
+
+router.post(
   '/login',
   validationChecker(authValidations.login),
   authController.login,

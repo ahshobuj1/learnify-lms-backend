@@ -1,11 +1,17 @@
 export type TUser = {
   name: string;
   email: string;
-  password: string;
+  password?: string;
   avatar?: string;
   status: 'in-progress' | 'blocked';
   role: 'user' | 'admin';
   isDeleted: boolean;
+};
+
+export type TSocialLogin = {
+  name: string;
+  email: string;
+  avatar?: string;
 };
 
 export type TActivateUser = {
