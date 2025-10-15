@@ -12,6 +12,7 @@ router.get('/me', auth(UserRole.admin, UserRole.user), userController.getMe);
 router.patch(
   '/update-profile',
   auth(UserRole.admin, UserRole.user),
+  validationChecker(userValidation.updateProfile),
   userController.updateUser,
 );
 

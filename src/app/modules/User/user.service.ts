@@ -3,7 +3,6 @@ import { JwtPayload } from 'jsonwebtoken';
 import { UserModel } from '../Auth/auth.model';
 import { AppError } from '../../errors/AppError';
 import QueryBuilder from '../../builder/QueryBuilder';
-import { TUser } from '../Auth/auth.interface';
 
 const getAllUser = async (query: Record<string, unknown>) => {
   const userQuery = new QueryBuilder(UserModel.find(), query)
@@ -33,7 +32,10 @@ const getMe = async (token: JwtPayload) => {
   return { user };
 };
 
-const updateUser = async (token: JwtPayload, payload: Partial<TUser>) => {
+const updateUser = async (
+  token: JwtPayload,
+  payload: { avatar: string; name: string },
+) => {
   const { email } = token;
   const updatedUser = await UserModel.findOneAndUpdate({ email }, payload, {
     new: true,
@@ -42,7 +44,10 @@ const updateUser = async (token: JwtPayload, payload: Partial<TUser>) => {
   return updatedUser;
 };
 
-const changeUserStatus = async (id: string, payload: { status: string }) => {
+const changeUserStatus = async (
+  id: string,
+  payload: { status: string; role: string },
+) => {
   const result = await UserModel.findByIdAndUpdate(id, payload, { new: true });
   return result;
 };
