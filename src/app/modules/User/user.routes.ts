@@ -9,6 +9,11 @@ const router = Router();
 
 router.get('/', auth(UserRole.admin, UserRole.user), userController.getAllUser);
 router.get('/me', auth(UserRole.admin, UserRole.user), userController.getMe);
+router.patch(
+  '/update-profile',
+  auth(UserRole.admin, UserRole.user),
+  userController.updateUser,
+);
 
 router.patch(
   '/change-status/:id',

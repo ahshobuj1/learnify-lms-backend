@@ -22,6 +22,16 @@ const getMe = catchAsync(async (req, res) => {
   });
 });
 
+const updateUser = catchAsync(async (req, res) => {
+  const token = req.user;
+  const result = await userService.updateUser(token, req.body);
+
+  sendResponse(res, {
+    message: 'Profile is updated successfully',
+    result: result,
+  });
+});
+
 const changeUserStatus = catchAsync(async (req, res) => {
   const { id } = req.params;
   const result = await userService.changeUserStatus(id, req.body);
@@ -36,4 +46,5 @@ export const userController = {
   getMe,
   changeUserStatus,
   getAllUser,
+  updateUser,
 };
