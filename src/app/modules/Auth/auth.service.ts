@@ -99,27 +99,32 @@ const socialLogin = async (payload: TSocialLogin) => {
     isDeleted: false,
   };
 
-  // create jwt token
-  const jwtPayload = {
-    email: userData?.email,
-    role: userData?.role,
-  };
-
-  const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, {
-    expiresIn: config.jwt_access_expires_in as jwt.SignOptions['expiresIn'],
-  });
-
-  const refreshToken = jwt.sign(
-    jwtPayload,
-    config.jwt_refresh_secret as string,
-    {
-      expiresIn: config.jwt_refresh_expires_in as jwt.SignOptions['expiresIn'],
-    },
-  );
-
   // If new user, then create and send token
   if (!user) {
     const createUser = await UserModel.create(userData);
+
+    // create jwt token
+    const jwtPayload = {
+      email: createUser?.email,
+      role: createUser?.role,
+    };
+
+    const accessToken = jwt.sign(
+      jwtPayload,
+      config.jwt_access_secret as string,
+      {
+        expiresIn: config.jwt_access_expires_in as jwt.SignOptions['expiresIn'],
+      },
+    );
+
+    const refreshToken = jwt.sign(
+      jwtPayload,
+      config.jwt_refresh_secret as string,
+      {
+        expiresIn:
+          config.jwt_refresh_expires_in as jwt.SignOptions['expiresIn'],
+      },
+    );
 
     return {
       accessToken,
@@ -137,6 +142,24 @@ const socialLogin = async (payload: TSocialLogin) => {
   if (user?.status === 'blocked') {
     throw new AppError(httpStatus.FORBIDDEN, 'User is blocked');
   }
+
+  // create jwt token
+  const jwtPayload = {
+    email: user?.email,
+    role: user?.role,
+  };
+
+  const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, {
+    expiresIn: config.jwt_access_expires_in as jwt.SignOptions['expiresIn'],
+  });
+
+  const refreshToken = jwt.sign(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    {
+      expiresIn: config.jwt_refresh_expires_in as jwt.SignOptions['expiresIn'],
+    },
+  );
 
   return {
     accessToken,

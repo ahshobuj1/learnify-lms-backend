@@ -5,10 +5,10 @@ import config from '../../config';
 
 const userSchema = new Schema<TUser>(
   {
+    name: { type: String },
     email: { type: String, unique: true },
     password: { type: String, select: 0 },
     avatar: { type: String },
-    needPasswordChange: { type: Boolean, default: true },
     role: { type: String, enum: ['user', 'admin'] },
     status: {
       type: String,
@@ -23,19 +23,24 @@ const userSchema = new Schema<TUser>(
 );
 
 // create pre middlewares before save data
-userSchema.pre('save', async function (next) {
+userSchema.pre<TUser>('save', async function (next) {
   // eslint-disable-next-line @typescript-eslint/no-this-alias
   const user = this;
 
-  user.password = await bcrypt.hash(
-    user.password!,
-    Number(config.bcrypt_salt_rounds),
-  );
+  if (user.password) {
+    user.password = await bcrypt.hash(
+      user.password!,
+      Number(config.bcrypt_salt_rounds),
+    );
+
+    next();
+  }
+
   next();
 });
 
 // create post middlewares after save data
-userSchema.post('save', function (doc, next) {
+userSchema.post<TUser>('save', function (doc, next) {
   doc.password = '';
   next();
 });

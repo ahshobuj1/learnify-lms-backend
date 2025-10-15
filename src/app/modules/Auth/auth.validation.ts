@@ -28,7 +28,7 @@ const activateUser = z.object({
 
 const socialLogin = z.object({
   name: z.string(),
-  email: z.string({ required_error: 'Id is required!' }),
+  email: z.string({ required_error: 'Email is required!' }),
   avatar: z.string().optional(),
 });
 
