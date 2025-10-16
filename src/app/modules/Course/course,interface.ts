@@ -7,6 +7,12 @@ export type TComment = {
   commentReplies?: TComment[];
 };
 
+export type TAddComment = {
+  comment: string;
+  courseId: string;
+  contentId: string;
+};
+
 // export type for reviews
 export type TReview = {
   user: Types.ObjectId;
@@ -23,6 +29,7 @@ export type TLink = {
 
 // export type for individual course data/lectures
 export type TCourseData = {
+  _id: Types.ObjectId;
   title: string;
   description: string;
   videoUrl: string;

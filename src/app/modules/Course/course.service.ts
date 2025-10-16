@@ -1,9 +1,11 @@
 import httpStatus from 'http-status';
-import { TCourse } from './course,interface';
+import { TAddComment, TComment, TCourse } from './course,interface';
 import { CourseModel } from './course.model';
 import { AppError } from '../../errors/AppError';
 import QueryBuilder from '../../builder/QueryBuilder';
 import { redis } from '../../utils/redisDB';
+import { UserModel } from '../Auth/auth.model';
+import { JwtPayload } from 'jsonwebtoken';
 
 const createCourse = async (payload: TCourse) => {
   const isCourseExists = await CourseModel.findOne({ name: payload.name });
@@ -32,13 +34,15 @@ const getAllCourse = async (query: Record<string, unknown>) => {
     return course;
   }
 
-  console.log('Hitting mongodb');
+  // console.log('Hitting mongodb');
 
   const courseQuery = new QueryBuilder(
     CourseModel.find()
       .select(
         '-courseData.suggestion -courseData.videoUrl -courseData.links -courseData.videoSection -courseData.videoLength -courseData.title',
       )
+      .populate('courseData.questions.user')
+      .populate('courseData.questions.commentReplies.user')
       .populate('reviews.user'),
     query,
   )
@@ -72,17 +76,45 @@ const getSingleCourse = async (id: string) => {
     return course;
   }
 
-  console.log('from mongodbj');
+  // console.log('from mongodb');
 
   const result = await CourseModel.findById(id)
 
     .select(
       '-courseData.suggestion -courseData.videoUrl -courseData.links -courseData.videoSection -courseData.videoLength -courseData.title',
     )
+    .populate('courseData.questions.user')
+    .populate('courseData.questions.commentReplies.user')
     .populate('reviews.user');
 
   // set cache to redis
   await redis.set(cacheKey, JSON.stringify(result));
+
+  return result;
+};
+
+// For user who purchased
+const getCourseByUser = async (id: string, user: JwtPayload) => {
+  const userExist = await UserModel.findOne({ email: user.email });
+  // console.log(userExist);
+
+  if (!userExist) {
+    throw new AppError(httpStatus.NOT_FOUND, `User not found..!`);
+  }
+
+  const isCoursePurchased = userExist.course?.find(
+    (course) => course.courseId.toString() === id,
+  );
+
+  if (!isCoursePurchased) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      `You are not alignable for this course..!`,
+    );
+  }
+
+  const course = await CourseModel.findById(id);
+  const result = course?.courseData;
 
   return result;
 };
@@ -111,55 +143,47 @@ const deleteCourse = async (id: string) => {
   return result;
 };
 
-// const updateFacultiesWithCourse = async (
-//   courseId: string,
-//   payload: Partial<TCourseFaculty>,
-// ) => {
-//   // Add faculties from array
-//   const result = await CourseFacultyModel.findByIdAndUpdate(
-//     courseId,
-//     {
-//       course: courseId,
-//       $addToSet: { faculties: { $each: payload } },
-//     },
-//     { upsert: true, new: true },
-//   );
+const addComment = async (payload: TAddComment, token: JwtPayload) => {
+  const { comment, courseId, contentId } = payload;
 
-//   return result;
-// };
+  const course = await CourseModel.findById(courseId).populate(
+    'courseData.questions.user',
+  );
+  if (!course) {
+    throw new AppError(httpStatus.NOT_FOUND, `Course is not found..!`);
+  }
 
-// const getFacultiesWithCourse = async (courseId: string) => {
-//   // Add faculties from array
-//   const result = await CourseFacultyModel.findOne({
-//     course: courseId,
-//   }).populate('faculties');
+  const courseContent = course?.courseData?.find(
+    (item) => item?._id.toString() === contentId,
+  );
 
-//   return result;
-// };
+  if (!courseContent) {
+    throw new AppError(httpStatus.NOT_FOUND, `Invalid course content id..!`);
+  }
 
-// const removeFacultiesWithCourse = async (
-//   id: string,
-//   payload: Partial<TCourseFaculty>,
-// ) => {
-//   // Remove faculties from array
-//   const result = await CourseFacultyModel.findByIdAndUpdate(
-//     id,
-//     {
-//       $pull: { faculties: { $in: payload } },
-//     },
-//     { new: true },
-//   );
+  const user = await UserModel.findOne({ email: token.email });
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, `User is not found..!`);
+  }
 
-//   return result;
-// };
+  const newComment: TComment = {
+    user: user?._id,
+    comment: comment,
+    commentReplies: [],
+  };
+
+  courseContent.questions?.push(newComment);
+  await course.save();
+
+  return course;
+};
 
 export const courseService = {
   createCourse,
   getAllCourse,
   getSingleCourse,
+  getCourseByUser,
   updateCourse,
   deleteCourse,
-  // updateFacultiesWithCourse,
-  // getFacultiesWithCourse,
-  // removeFacultiesWithCourse,
+  addComment,
 };

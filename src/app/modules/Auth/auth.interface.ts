@@ -1,8 +1,12 @@
+import { Types } from 'mongoose';
+
 export type TUser = {
+  _id?: Types.ObjectId;
   name: string;
   email: string;
   password?: string;
   avatar?: string;
+  course?: [{ courseId: Types.ObjectId }];
   status: 'in-progress' | 'blocked';
   role: 'user' | 'admin';
   isDeleted: boolean;

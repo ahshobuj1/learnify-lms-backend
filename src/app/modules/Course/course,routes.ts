@@ -16,9 +16,20 @@ router.post(
 
 router.get('/', courseController.getAllCourse);
 router.get('/:id', courseController.getSingleCourse);
+router.get(
+  '/user-course-content/:id',
+  auth(UserRole.user),
+  courseController.getCourseByUser,
+);
+
+router.post(
+  '/add-comment',
+  auth(UserRole.user, UserRole.admin),
+  courseController.addComment,
+);
 
 router.patch(
-  '/update-course/:id',
+  '/update-course',
   auth(UserRole.admin, UserRole.user),
   validationChecker(courseValidations.updateCourse),
   courseController.updateCourse,
@@ -29,25 +40,5 @@ router.delete(
   auth(UserRole.admin, UserRole.user),
   courseController.deleteCourse,
 );
-
-// router.put(
-//   '/:courseId/assign-course-faculties',
-//   auth(UserRole.superAdmin, UserRole.admin),
-//   validationChecker(courseValidations.FacultyWithCourseValidation),
-//   courseController.updateFacultiesWithCourse,
-// );
-
-// router.get(
-//   '/:courseId/get-course-faculties',
-//   auth(UserRole.superAdmin, UserRole.admin, UserRole.faculty, UserRole.student),
-//   courseController.getFacultiesWithCourse,
-// );
-
-// router.delete(
-//   '/:courseId/remove-course-faculties',
-//   auth(UserRole.superAdmin, UserRole.admin),
-//   validationChecker(courseValidations.FacultyWithCourseValidation),
-//   courseController.removeFacultiesWithCourse,
-// );
 
 export const courseRoutes = router;

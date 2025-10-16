@@ -62,7 +62,20 @@ export const updateCourse = z.object({
   purchased: z.number().optional(),
 });
 
+export type TAddComment = {
+  comment: string;
+  courseId: string;
+  contentId: string;
+};
+
+const addComment = z.object({
+  comment: z.string(),
+  courseId: z.string(),
+  contentId: z.string(),
+});
+
 export const courseValidations = {
   createCourse,
   updateCourse,
+  addComment,
 };

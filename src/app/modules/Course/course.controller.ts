@@ -25,6 +25,14 @@ const getSingleCourse = catchAsync(async (req, res) => {
   sendResponse(res, { message: 'Course is retrieved successfully', result });
 });
 
+const getCourseByUser = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const user = req.user;
+  const result = await courseService.getCourseByUser(id, user);
+
+  sendResponse(res, { message: 'Course is retrieved successfully', result });
+});
+
 const updateCourse = catchAsync(async (req, res) => {
   const { id } = req.params;
   const updatedCourseData = req.body;
@@ -40,54 +48,19 @@ const deleteCourse = catchAsync(async (req, res) => {
   sendResponse(res, { message: 'Course is deleted successfully', result });
 });
 
-// const updateFacultiesWithCourse = catchAsync(async (req, res) => {
-//   const { courseId } = req.params;
-//   const { faculties } = req.body;
+const addComment = catchAsync(async (req, res) => {
+  const user = req.user;
+  const result = await courseService.addComment(req.body, user);
 
-//   const result = await courseService.updateFacultiesWithCourse(
-//     courseId,
-//     faculties,
-//   );
-
-//   sendResponse(res, {
-//     message: 'Course Faculty is updated successfully',
-//     result,
-//   });
-// });
-
-// const getFacultiesWithCourse = catchAsync(async (req, res) => {
-//   const { courseId } = req.params;
-
-//   const result = await courseService.getFacultiesWithCourse(courseId);
-
-//   sendResponse(res, {
-//     message: 'Course Faculty is retrieved successfully',
-//     result,
-//   });
-// });
-
-// const removeFacultiesWithCourse = catchAsync(async (req, res) => {
-//   const { courseId } = req.params;
-//   const { faculties } = req.body;
-
-//   const result = await courseService.removeFacultiesWithCourse(
-//     courseId,
-//     faculties,
-//   );
-
-//   sendResponse(res, {
-//     message: 'Course Faculty is removed successfully',
-//     result,
-//   });
-// });
+  sendResponse(res, { message: 'Comment is added successfully', result });
+});
 
 export const courseController = {
   createCourse,
   getAllCourse,
   getSingleCourse,
+  getCourseByUser,
   updateCourse,
   deleteCourse,
-  // updateFacultiesWithCourse,
-  // getFacultiesWithCourse,
-  // removeFacultiesWithCourse,
+  addComment,
 };

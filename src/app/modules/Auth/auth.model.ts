@@ -2,6 +2,16 @@ import { model, Schema } from 'mongoose';
 import { TUser } from './auth.interface';
 import bcrypt from 'bcrypt';
 import config from '../../config';
+//    preRequisiteCourses: { type: [preRequisiteCoursesSchema], default: [] },
+//    const preRequisiteCoursesSchema = new Schema<TPreRequisiteCourses>(
+//   {
+//     course: { type: Schema.Types.ObjectId, ref: 'Course' },
+//     isDeleted: { type: Boolean, default: false },
+//   },
+//   {
+//     _id: false,
+//   },
+// );
 
 const userSchema = new Schema<TUser>(
   {
@@ -10,6 +20,15 @@ const userSchema = new Schema<TUser>(
     password: { type: String, select: 0 },
     avatar: { type: String },
     role: { type: String, enum: ['user', 'admin'] },
+    course: [
+      {
+        courseId: {
+          type: Schema.Types.ObjectId,
+          ref: 'Course',
+          required: true,
+        },
+      },
+    ],
     status: {
       type: String,
       enum: ['in-progress', 'blocked'],
