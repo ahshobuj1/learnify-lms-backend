@@ -8,37 +8,37 @@ const createCourse = catchAsync(async (req, res) => {
   sendResponse(res, { message: 'Course is created successfully', result });
 });
 
-// const getAllCourse = catchAsync(async (req, res) => {
-//   const result = await courseService.getAllCourse(req?.query);
+const getAllCourse = catchAsync(async (req, res) => {
+  const result = await courseService.getAllCourse(req?.query);
 
-//   sendResponse(res, {
-//     message: 'Course is retrieved successfully',
-//     meta: result?.meta,
-//     result: result?.result,
-//   });
-// });
+  sendResponse(res, {
+    message: 'Course is retrieved successfully',
+    meta: result?.meta,
+    result: result?.result,
+  });
+});
 
-// const getSingleCourse = catchAsync(async (req, res) => {
-//   const { id } = req.params;
-//   const result = await courseService.getSingleCourse(id);
+const getSingleCourse = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await courseService.getSingleCourse(id);
 
-//   sendResponse(res, { message: 'Course is retrieved successfully', result });
-// });
+  sendResponse(res, { message: 'Course is retrieved successfully', result });
+});
 
-// const updateCourse = catchAsync(async (req, res) => {
-//   const { id } = req.params;
-//   const updatedCourseData = req.body;
-//   const result = await courseService.updateCourse(id, updatedCourseData);
+const updateCourse = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const updatedCourseData = req.body;
+  const result = await courseService.updateCourse(id, updatedCourseData);
 
-//   sendResponse(res, { message: 'Course is updated successfully', result });
-// });
+  sendResponse(res, { message: 'Course is updated successfully', result });
+});
 
-// const deleteCourse = catchAsync(async (req, res) => {
-//   const { id } = req.params;
-//   const result = await courseService.deleteCourse(id);
+const deleteCourse = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await courseService.deleteCourse(id);
 
-//   sendResponse(res, { message: 'Course is deleted successfully', result });
-// });
+  sendResponse(res, { message: 'Course is deleted successfully', result });
+});
 
 // const updateFacultiesWithCourse = catchAsync(async (req, res) => {
 //   const { courseId } = req.params;
@@ -83,10 +83,10 @@ const createCourse = catchAsync(async (req, res) => {
 
 export const courseController = {
   createCourse,
-  // getAllCourse,
-  // getSingleCourse,
-  // updateCourse,
-  // deleteCourse,
+  getAllCourse,
+  getSingleCourse,
+  updateCourse,
+  deleteCourse,
   // updateFacultiesWithCourse,
   // getFacultiesWithCourse,
   // removeFacultiesWithCourse,

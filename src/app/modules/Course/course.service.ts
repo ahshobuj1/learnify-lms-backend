@@ -2,6 +2,7 @@ import httpStatus from 'http-status';
 import { TCourse } from './course,interface';
 import { CourseModel } from './course.model';
 import { AppError } from '../../errors/AppError';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 const createCourse = async (payload: TCourse) => {
   const isCourseExists = await CourseModel.findOne({ name: payload.name });
@@ -17,116 +18,52 @@ const createCourse = async (payload: TCourse) => {
   return result;
 };
 
-// const getAllCourse = async (query: Record<string, unknown>) => {
-//   const courseQuery = new QueryBuilder(
-//     CourseModel.find({ isDeleted: !true }).populate(
-//       'preRequisiteCourses.course',
-//     ),
-//     query,
-//   )
-//     .search(courseSearchableFields)
-//     .filter()
-//     .sort()
-//     .pagination()
-//     .fields();
+const getAllCourse = async (query: Record<string, unknown>) => {
+  const courseQuery = new QueryBuilder(
+    CourseModel.find().populate('reviews.user'),
+    query,
+  )
+    .filter()
+    .sort()
+    .pagination()
+    .fields();
+  // .search(courseSearchableFields)
 
-//   const result = await courseQuery.modelQuery;
-//   const meta = await courseQuery.countTotal();
+  const result = await courseQuery.modelQuery;
+  const meta = await courseQuery.countTotal();
 
-//   return { meta, result };
-// };
+  return { meta, result };
+};
 
-// const getSingleCourse = async (id: string) => {
-//   const result = await CourseModel.findById(id).populate(
-//     'preRequisiteCourses.course',
-//   );
+const getSingleCourse = async (id: string) => {
+  const result = await CourseModel.findById(id).populate('reviews.user');
 
-//   return result;
-// };
+  return result;
+};
 
-// const updateCourse = async (id: string, payload: Partial<TCourse>) => {
-//   const session = await mongoose.startSession();
-//   const { preRequisiteCourses, ...remainingCourseData } = payload;
+const updateCourse = async (id: string, payload: Partial<TCourse>) => {
+  const basicCourseUpdateInfo = await CourseModel.findByIdAndUpdate(
+    id,
+    payload,
+    {
+      new: true,
+    },
+  );
 
-//   try {
-//     session.startTransaction();
+  return basicCourseUpdateInfo;
+};
 
-//     const basicCourseUpdateInfo = await CourseModel.findByIdAndUpdate(
-//       id,
-//       remainingCourseData,
-//       {
-//         new: true,
-//         session,
-//       },
-//     );
+const deleteCourse = async (id: string) => {
+  const result = await CourseModel.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    {
+      new: true,
+    },
+  );
 
-//     if (!basicCourseUpdateInfo) {
-//       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to update course');
-//     }
-
-//     if (preRequisiteCourses && preRequisiteCourses.length > 0) {
-//       const PreRequisiteToDelete = preRequisiteCourses
-//         .filter((item) => item.course && item.isDeleted)
-//         .map((item) => item.course);
-
-//       // Delete course to array
-//       const deletedPreRequisiteCourses = await CourseModel.findByIdAndUpdate(
-//         id,
-//         {
-//           $pull: {
-//             preRequisiteCourses: { course: { $in: PreRequisiteToDelete } },
-//           },
-//         },
-//         { new: true, session },
-//       );
-
-//       if (!deletedPreRequisiteCourses) {
-//         throw new AppError(httpStatus.BAD_REQUEST, 'Failed to update course');
-//       }
-
-//       // Add new course to array
-//       const preRequisiteToAdd = preRequisiteCourses.filter(
-//         (item) => item.course && !item.isDeleted,
-//       );
-
-//       const addedNewPreRequisite = await CourseModel.findByIdAndUpdate(
-//         id,
-//         {
-//           $addToSet: {
-//             preRequisiteCourses: { $each: preRequisiteToAdd },
-//           },
-//         },
-//         { new: true, session },
-//       );
-
-//       if (!addedNewPreRequisite) {
-//         throw new AppError(httpStatus.BAD_REQUEST, 'Failed to update course');
-//       }
-//     }
-
-//     await session.commitTransaction();
-//     await session.endSession();
-
-//     const result = await CourseModel.findById(id);
-//     return result;
-//   } catch (err: any) {
-//     await session.abortTransaction();
-//     await session.endSession();
-//     throw new Error(err);
-//   }
-// };
-
-// const deleteCourse = async (id: string) => {
-//   const result = await CourseModel.findByIdAndUpdate(
-//     id,
-//     { isDeleted: true },
-//     {
-//       new: true,
-//     },
-//   );
-
-//   return result;
-// };
+  return result;
+};
 
 // const updateFacultiesWithCourse = async (
 //   courseId: string,
@@ -172,10 +109,10 @@ const createCourse = async (payload: TCourse) => {
 
 export const courseService = {
   createCourse,
-  // getAllCourse,
-  // getSingleCourse,
-  // updateCourse,
-  // deleteCourse,
+  getAllCourse,
+  getSingleCourse,
+  updateCourse,
+  deleteCourse,
   // updateFacultiesWithCourse,
   // getFacultiesWithCourse,
   // removeFacultiesWithCourse,

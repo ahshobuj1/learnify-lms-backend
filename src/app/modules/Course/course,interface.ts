@@ -50,4 +50,5 @@ export type TCourse = {
   courseData: TCourseData[];
   ratings?: number;
   purchased?: number;
+  isDeleted?: boolean;
 };
