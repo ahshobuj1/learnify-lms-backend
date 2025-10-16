@@ -3,6 +3,7 @@ import { TCourse } from './course,interface';
 import { CourseModel } from './course.model';
 import { AppError } from '../../errors/AppError';
 import QueryBuilder from '../../builder/QueryBuilder';
+import { redis } from '../../utils/redisDB';
 
 const createCourse = async (payload: TCourse) => {
   const isCourseExists = await CourseModel.findOne({ name: payload.name });
@@ -18,9 +19,27 @@ const createCourse = async (payload: TCourse) => {
   return result;
 };
 
+// without purchasing
 const getAllCourse = async (query: Record<string, unknown>) => {
+  // Use redis cache
+  const cacheKey = 'allCourses';
+  const isCacheDataExist = await redis.get(cacheKey);
+
+  // send courses data from cache
+  if (isCacheDataExist) {
+    console.log('from cache');
+    const course = JSON.parse(isCacheDataExist);
+    return course;
+  }
+
+  console.log('Hitting mongodb');
+
   const courseQuery = new QueryBuilder(
-    CourseModel.find().populate('reviews.user'),
+    CourseModel.find()
+      .select(
+        '-courseData.suggestion -courseData.videoUrl -courseData.links -courseData.videoSection -courseData.videoLength -courseData.title',
+      )
+      .populate('reviews.user'),
     query,
   )
     .filter()
@@ -32,11 +51,38 @@ const getAllCourse = async (query: Record<string, unknown>) => {
   const result = await courseQuery.modelQuery;
   const meta = await courseQuery.countTotal();
 
-  return { meta, result };
+  const responseCourses = { meta, result };
+
+  // set cache to redis
+  await redis.set(cacheKey, JSON.stringify(responseCourses));
+
+  return responseCourses;
 };
 
+// without purchasing
 const getSingleCourse = async (id: string) => {
-  const result = await CourseModel.findById(id).populate('reviews.user');
+  // Use redis cache
+  const cacheKey = id;
+  const isCacheDataExist = await redis.get(cacheKey);
+
+  // send courses data from cache
+  if (isCacheDataExist) {
+    console.log('from cache');
+    const course = JSON.parse(isCacheDataExist);
+    return course;
+  }
+
+  console.log('from mongodbj');
+
+  const result = await CourseModel.findById(id)
+
+    .select(
+      '-courseData.suggestion -courseData.videoUrl -courseData.links -courseData.videoSection -courseData.videoLength -courseData.title',
+    )
+    .populate('reviews.user');
+
+  // set cache to redis
+  await redis.set(cacheKey, JSON.stringify(result));
 
   return result;
 };
