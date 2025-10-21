@@ -22,11 +22,8 @@ const userSchema = new Schema<TUser>(
     role: { type: String, enum: ['user', 'admin'] },
     course: [
       {
-        courseId: {
-          type: Schema.Types.ObjectId,
-          ref: 'Course',
-          required: true,
-        },
+        type: Schema.Types.ObjectId,
+        ref: 'Course',
       },
     ],
     status: {

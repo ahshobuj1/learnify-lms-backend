@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Elearning Order Confirmation</title>
+  </head>
+  <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr>
+        <td style="padding: 20px 0;">
+          <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse; background-color: #ffffff; border-radius: 10px; overflow: hidden;">
+            
+            <tr>
+              <td align="center" style="background-color: #4f46e5; padding: 40px 20px; color: #ffffff;">
+                <h1 style="margin: 0; font-size: 28px; font-weight: bold;">Your ELearning order is confirmed!</h1>
+                <p style="margin: 10px 0 0; font-size: 16px;">And we're just as excited as you are.</p>
+              </td>
+            </tr>
+
+            <tr>
+              <td style="padding: 40px 30px;">
+                <h2 style="color: #10b981; margin: 0 0 20px; font-size: 20px;">Here's what you ordered:</h2>
+                
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 20px;">
+                  <tr>
+                    <td style="color: #555555;">Order #: <%= order.id %></td>
+                    <td align="right" style="color: #555555;">Order Date: <%= order.date %></td>
+                  </tr>
+                </table>
+
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top: 1px solid #dddddd; border-bottom: 1px solid #dddddd;">
+                  <thead>
+                    <tr>
+                      <th align="left" style="padding: 15px 0; color: #555555; font-size: 14px;">ITEM</th>
+                      <th align="center" style="padding: 15px 0; color: #555555; font-size: 14px;">QTY</th>
+                      <th align="right" style="padding: 15px 0; color: #555555; font-size: 14px;">COST</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="padding: 15px 0; color: #333333;"><%= order.name %></td>
+                      <td align="center" style="padding: 15px 0; color: #333333;">1</td>
+                      <td align="right" style="padding: 15px 0; color: #333333;">$<%= order.price %></td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-top: 20px;">
+                  <tr>
+                    <td align="right" style="padding: 5px 0; color: #555555;">Subtotal:</td>
+                    <td align="right" width="100" style="padding: 5px 0; color: #333333;">$<%= order.price %></td>
+                  </tr>
+                  <tr>
+                    <td align="right" style="padding: 5px 0; font-weight: bold; color: #333333;">Total:</td>
+                    <td align="right" width="100" style="padding: 5px 0; font-weight: bold; color: #333333;">$<%= order.price %></td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center" style="background-color: #4f46e5; padding: 30px 20px; color: #ffffff; font-size: 12px;">
+                <p style="margin: 0; color: #ffffff; ">If you have any questions, please contact our support team at ahshobuj11@gmail.com</p>
+                <p style="margin: 10px 0 0;">&copy; 2025 ELearning, All rights reserved.</p>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

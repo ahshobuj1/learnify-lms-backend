@@ -6,7 +6,7 @@ export type TUser = {
   email: string;
   password?: string;
   avatar?: string;
-  course?: [{ courseId: Types.ObjectId }];
+  course?: [Types.ObjectId];
   status: 'in-progress' | 'blocked';
   role: 'user' | 'admin';
   isDeleted: boolean;

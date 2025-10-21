@@ -18,7 +18,7 @@ export const sendEmail = async (options: {
   });
 
   await transporter.sendMail({
-    from: `"PH University" ${config.smtp_user}`,
+    from: `"Learnify LMS" ${config.smtp_user}`,
     to: options.to,
     subject: options.subject,
     html: options.html,
