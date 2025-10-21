@@ -55,6 +55,16 @@ const addComment = catchAsync(async (req, res) => {
   sendResponse(res, { message: 'Comment is added successfully', result });
 });
 
+const answerComment = catchAsync(async (req, res) => {
+  const user = req.user;
+  const result = await courseService.answerComment(req.body, user);
+
+  sendResponse(res, {
+    message: 'Comment replay is added successfully',
+    result,
+  });
+});
+
 export const courseController = {
   createCourse,
   getAllCourse,
@@ -63,4 +73,5 @@ export const courseController = {
   updateCourse,
   deleteCourse,
   addComment,
+  answerComment,
 };

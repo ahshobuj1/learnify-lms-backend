@@ -1,7 +1,8 @@
-import { Types } from 'mongoose';
+import { ObjectId, Types } from 'mongoose';
 
 // Interface for comments
 export type TComment = {
+  _id?: ObjectId;
   user: Types.ObjectId;
   comment: string;
   commentReplies?: TComment[];
@@ -11,6 +12,13 @@ export type TAddComment = {
   comment: string;
   courseId: string;
   contentId: string;
+};
+
+export type TAnswerComment = {
+  comment: string;
+  courseId: string;
+  contentId: string;
+  commentId: string;
 };
 
 // export type for reviews

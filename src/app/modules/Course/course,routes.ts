@@ -28,6 +28,12 @@ router.post(
   courseController.addComment,
 );
 
+router.post(
+  '/answer-comment',
+  auth(UserRole.user, UserRole.admin),
+  courseController.answerComment,
+);
+
 router.patch(
   '/update-course',
   auth(UserRole.admin, UserRole.user),
