@@ -24,9 +24,15 @@ export type TAnswerComment = {
 // export type for reviews
 export type TReview = {
   user: Types.ObjectId;
-  rating: number;
+  rating?: number;
   comment: string;
   commentReplies?: TComment[];
+};
+
+export type TReplayReview = {
+  comment: string;
+  courseId: string;
+  reviewId: string;
 };
 
 // export type for links within course data

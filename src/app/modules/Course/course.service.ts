@@ -4,6 +4,8 @@ import {
   TAnswerComment,
   TComment,
   TCourse,
+  TReplayReview,
+  TReview,
 } from './course,interface';
 import { CourseModel } from './course.model';
 import { AppError } from '../../errors/AppError';
@@ -11,7 +13,7 @@ import QueryBuilder from '../../builder/QueryBuilder';
 import { redis } from '../../utils/redisDB';
 import { UserModel } from '../Auth/auth.model';
 import { JwtPayload } from 'jsonwebtoken';
-import { sendEmailCommon } from '../../utils/sendCommentReplayEmail';
+import { sendEmail } from '../../utils/sendEmail';
 
 const createCourse = async (payload: TCourse) => {
   const isCourseExists = await CourseModel.findOne({ name: payload.name });
@@ -255,8 +257,102 @@ const answerComment = async (payload: TAnswerComment, token: JwtPayload) => {
     };
 
     //* send otp to email
-    await sendEmailCommon(options);
+    await sendEmail(options);
   }
+
+  return course;
+};
+
+const addReview = async (id: string, token: JwtPayload, payload: TReview) => {
+  const { comment, rating } = payload;
+
+  const user = await UserModel.findOne({ email: token.email });
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, `User is not found..!`);
+  }
+
+  const userCourseList = user?.course;
+
+  // Is user purchased this course
+  const isCourseExist = userCourseList?.some(
+    (course) => course?.courseId?.toString() === id,
+  );
+
+  if (!isCourseExist) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      `You are not eligible to access this course..!`,
+    );
+  }
+
+  // add review
+  const course = await CourseModel.findById(id);
+  if (!course) {
+    throw new AppError(httpStatus.NOT_FOUND, `Course is not found..!`);
+  }
+
+  const newComment: TReview = {
+    user: user?._id,
+    comment: comment,
+    rating: rating,
+  };
+
+  course.reviews?.push(newComment);
+
+  // Calculate average review
+  let average = 0;
+
+  if (course.reviews?.length) {
+    course.reviews?.forEach((review) => (average += review.rating));
+    course.ratings = average / course?.reviews?.length;
+  }
+
+  const notification = {
+    title: 'New Review Received..!',
+    message: `${user.email} has given a review for this course: ${course.name}`,
+  };
+
+  await course.save();
+
+  return course;
+};
+
+const replayReview = async (token: JwtPayload, payload: TReplayReview) => {
+  const { comment, courseId, reviewId } = payload;
+
+  const user = await UserModel.findOne({ email: token.email });
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, `User is not found..!`);
+  }
+
+  // add review
+  const course = await CourseModel.findById(courseId);
+  if (!course) {
+    throw new AppError(httpStatus.NOT_FOUND, `Course is not found..!`);
+  }
+
+  // Is user purchased this course
+  const isReviewExist = course?.reviews?.find(
+    (review) => review?._id?.toString() === reviewId,
+  );
+
+  if (!isReviewExist) {
+    throw new AppError(httpStatus.NOT_FOUND, `Review is not found..!`);
+  }
+
+  const newComment = {
+    user: user?._id,
+    comment: comment,
+  };
+
+  isReviewExist?.commentReplies?.push(newComment);
+
+  const notification = {
+    title: 'New Review Received..!',
+    message: `${user.email} has given a review for this course: ${course.name}`,
+  };
+
+  await course.save();
 
   return course;
 };
@@ -270,4 +366,6 @@ export const courseService = {
   deleteCourse,
   addComment,
   answerComment,
+  addReview,
+  replayReview,
 };

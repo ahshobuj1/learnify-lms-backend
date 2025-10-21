@@ -22,16 +22,28 @@ router.get(
   courseController.getCourseByUser,
 );
 
-router.post(
+router.put(
   '/add-comment',
   auth(UserRole.user, UserRole.admin),
   courseController.addComment,
 );
 
-router.post(
+router.put(
   '/answer-comment',
   auth(UserRole.user, UserRole.admin),
   courseController.answerComment,
+);
+
+router.put(
+  '/add-review/:id',
+  auth(UserRole.user, UserRole.admin),
+  courseController.addReview,
+);
+
+router.put(
+  '/replay-review',
+  auth(UserRole.user, UserRole.admin),
+  courseController.replayReview,
 );
 
 router.patch(

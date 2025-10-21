@@ -65,6 +65,21 @@ const answerComment = catchAsync(async (req, res) => {
   });
 });
 
+const addReview = catchAsync(async (req, res) => {
+  const id = req.params.id;
+  const user = req.user;
+  const result = await courseService.addReview(id, user, req.body);
+
+  sendResponse(res, { message: 'Review is added successfully', result });
+});
+
+const replayReview = catchAsync(async (req, res) => {
+  const user = req.user;
+  const result = await courseService.replayReview(user, req.body);
+
+  sendResponse(res, { message: 'Review is replied successfully', result });
+});
+
 export const courseController = {
   createCourse,
   getAllCourse,
@@ -74,4 +89,6 @@ export const courseController = {
   deleteCourse,
   addComment,
   answerComment,
+  addReview,
+  replayReview,
 };

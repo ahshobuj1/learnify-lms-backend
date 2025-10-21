@@ -373,8 +373,15 @@ const forgotPassword = async (email: string) => {
 
   const resetPasswordUiLink = `${config.reset_pass_ui_link}?email=${email}&token=${accessToken}`;
 
+  const emailOptions = {
+    to: user?.email,
+    subject: 'Reset your password!',
+    html: `
+      <p>Click here to reset: <a href="${resetPasswordUiLink}">${resetPasswordUiLink}</a></p>
+    `,
+  };
   // send the link to the user email
-  await sendEmail(user?.email, resetPasswordUiLink, 'Reset your password!');
+  await sendEmail(emailOptions);
 };
 
 const resetPassword = async (payload: TResetPassword, token: string) => {

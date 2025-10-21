@@ -1,11 +1,11 @@
 import nodemailer from 'nodemailer';
 import config from '../config';
 
-export const sendEmail = async (
-  to: string,
-  resetLink: string,
-  subject: string,
-) => {
+export const sendEmail = async (options: {
+  to: string;
+  subject: string;
+  html: string;
+}) => {
   // Create a test account or replace with real credentials.
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -19,10 +19,8 @@ export const sendEmail = async (
 
   await transporter.sendMail({
     from: `"PH University" ${config.smtp_user}`,
-    to,
-    subject,
-    html: `
-      <p>Click here to reset: <a href="${resetLink}">${resetLink}</a></p>
-    `,
+    to: options.to,
+    subject: options.subject,
+    html: options.html,
   });
 };
